@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiteMq", "LiteMq\LiteMq.csproj", "{47D36CCE-A49B-437B-BE7D-DA9116EDA65C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiteMq.Tests", "LiteMq.Tests\LiteMq.Tests.csproj", "{62B506E7-C3B0-4BFF-B44E-EEB4B263A056}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{47D36CCE-A49B-437B-BE7D-DA9116EDA65C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47D36CCE-A49B-437B-BE7D-DA9116EDA65C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47D36CCE-A49B-437B-BE7D-DA9116EDA65C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47D36CCE-A49B-437B-BE7D-DA9116EDA65C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62B506E7-C3B0-4BFF-B44E-EEB4B263A056}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62B506E7-C3B0-4BFF-B44E-EEB4B263A056}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62B506E7-C3B0-4BFF-B44E-EEB4B263A056}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62B506E7-C3B0-4BFF-B44E-EEB4B263A056}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
