@@ -1,6 +1,6 @@
 ﻿using LiteDB;
 
-namespace LiteMq;
+namespace LiteMq.Entities;
 
 internal class Message
 {

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Text;
+using LiteMq.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace LiteMq.Managers;

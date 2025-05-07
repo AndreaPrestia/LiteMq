@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using LiteDB;
+using LiteMq.Entities;
 using LiteMq.Managers;
 
 namespace LiteMq;

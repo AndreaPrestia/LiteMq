@@ -1,6 +1,6 @@
 ﻿using System.Net.Sockets;
 
-namespace LiteMq;
+namespace LiteMq.Entities;
 
 public class Subscription
 {

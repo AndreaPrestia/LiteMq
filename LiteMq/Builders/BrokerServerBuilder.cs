@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using LiteMq.Managers;
 
-namespace LiteMq;
+namespace LiteMq.Builders;
 
 public class BrokerServerBuilder
 {

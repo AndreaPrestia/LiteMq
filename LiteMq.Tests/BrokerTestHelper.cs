@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using LiteMq.Builders;
 using Xunit.Abstractions;
 
 namespace LiteMq.Tests;
