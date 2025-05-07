@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using LiteMq.Managers;
 
 namespace LiteMq;
 
@@ -8,10 +9,10 @@ public class BrokerServer
     private readonly TcpListener _listener;
     private readonly MessageQueue _queue;
 
-    internal BrokerServer(IPAddress ip, int port, string dbPath, List<IPEndPoint>? peers = null)
+    internal BrokerServer(IPAddress ip, int port, string dbPath, SubscriptionManager subscriptionManager, PeerManager peerManager)
     {
         _listener = new TcpListener(ip, port);
-        _queue = new MessageQueue(dbPath, peers);
+        _queue = new MessageQueue(dbPath, subscriptionManager, peerManager);
     }
     
     public void Start()
@@ -50,7 +51,7 @@ public class BrokerServer
                         _queue.Publish(topic, parts[2], forward: false); // prevent loops
                     break;
                 case "sub":
-                    _queue.Subscribe(topic, client);
+                    _queue.Subscribe(topic, client, false);
                     break;
             }
         }

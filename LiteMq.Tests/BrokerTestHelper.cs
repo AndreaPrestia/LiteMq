@@ -9,9 +9,7 @@ public class BrokerTestHelper(ITestOutputHelper testOutputHelper)
 
     public void StartCluster(int[] ports)
     {
-        var endpoints = new List<IPEndPoint>();
-        foreach (var port in ports)
-            endpoints.Add(new IPEndPoint(IPAddress.Loopback, port));
+        var endpoints = ports.Select(port => new IPEndPoint(IPAddress.Loopback, port)).ToList();
 
         foreach (var port in ports)
         {
@@ -38,7 +36,14 @@ public class BrokerTestHelper(ITestOutputHelper testOutputHelper)
     {
         var thread = new Thread(() =>
         {
-            var server = BrokerServerBuilder.Create().WithIp(ip).WithPort(port).WithPeers(peers).Build();
+            var server = BrokerServerBuilder
+                .Create()
+                .WithIp(ip)
+                .WithPort(port)
+                .WithPeers(peers)
+                .WithMaxRetryForPeersCommunication(3)
+                .WithMaxDelayForPeersCommunication(100)
+                .Build();
             server.Start(); // This blocks, so we use a thread
         })
         {

@@ -46,7 +46,7 @@ var server = BrokerServerBuilder
 server.Start();
 ```
 
-(Default: ip `127.0.0.1` port `80`, DB file `LiteMq_127.0.0.1_80.db`)
+(Default: ip `127.0.0.1` port `6000`, maxRetryForPeersCommunication `0`, maxDelayForPeersCommunicationInSeconds `100` DB file `LiteMq_127.0.0.1_6000.db`)
 
 ---
 
@@ -83,6 +83,8 @@ var server = BrokerServerBuilder
     .WithIp("127.0.0.1")
     .WithPort(5000)
     .WithPeers(peers)
+    .WithMaxRetryForPeersCommunication(3)
+    .WithMaxDelayForPeersCommunication(200)
     .Build();
 
 server.Start();
@@ -113,12 +115,16 @@ dotnet test
 ```
 LiteMq/
 ├── LiteMq
-├───────── BrokerServer.cs  # Core logic (broker + queue)
-├───────── MessageQueue.cs
-├───────── Entities
-├────────────────── Message.cs
 ├───────── Builders
 ├────────────────── BrokerServerBuilder.cs # Logic to build an instance
+├───────── Entities
+├────────────────── Message.cs
+├────────────────── Subscription.cs
+├───────── Managers
+├────────────────── SubscriptionManager.cs # Logic to manage subscriptions
+├────────────────── SubscriptionManager.cs # Logic to manage peers
+├───────── BrokerServer.cs  # Core logic (broker + queue)
+├───────── MessageQueue.cs
 ├── LiteMq.Tests
 ├───────── BrokerTestHelper.cs  # Utilities for spinning up test brokers
 ├───────── BrokerTests.cs  # Basic pub/sub tests
