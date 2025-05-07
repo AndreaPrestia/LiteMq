@@ -53,6 +53,9 @@ public class BrokerServer
                 case "sub":
                     _queue.Subscribe(topic, client, false);
                     break;
+                case "reset":
+                    _queue.Reset(topic, forward: false);
+                    break;
             }
         }
     }

@@ -8,6 +8,7 @@ internal class Message
     public string Topic { get; set; } = "";
     public string Payload { get; set; } = "";
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    public DateTime? Expiration { get; set; }
     public int RetryCount { get; set; } = 0;
     public int MaxRetries { get; set; } = 3;
     public string Hash => $"{Topic}|{Payload}".GetHashCode().ToString();

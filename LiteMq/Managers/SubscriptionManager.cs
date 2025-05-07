@@ -127,24 +127,37 @@ internal class SubscriptionManager
     
     private void OnNotifySubscribers(object sender, string topic, string payload)
     {
-        if (_subscribers.TryGetValue(topic, out var subscriptions))
+        var subscription = GetNextSubscription(topic);
+
+        if (subscription == null)
         {
-            foreach (var subscription in subscriptions.ToList())
-            {
-                try
-                {
-                    if (subscription.Client is { Connected: true })
-                    {
-                        var stream = subscription.Client.GetStream();
-                        var data = Encoding.UTF8.GetBytes(payload + "\n");
-                        stream.Write(data, 0, data.Length);
-                    }
-                }
-                catch
-                {
-                    subscriptions.Remove(subscription);
-                }
-            }
+            _logger.LogInformation(
+                "No active subscriptions found for topic '{topic}'. No processing will be done.", topic);
+            return;
         }
+
+        try
+        {
+            if (subscription.Client is not { Connected: true })
+            {
+                var removedSubscription = RemoveSubscription(topic, subscription);
+                _logger.LogInformation("Removed subscription '{subscriptionId}' for topic '{topic}' with result: {removedSubscription}", subscription.Id, topic, removedSubscription);
+                return;
+            }
+            
+            var stream = subscription.Client.GetStream();
+            var data = Encoding.UTF8.GetBytes(payload + "\n");
+            stream.Write(data, 0, data.Length);
+        }
+        catch
+        {
+           var removedSubscription = RemoveSubscription(topic, subscription);
+           _logger.LogInformation("Removed subscription '{subscriptionId}' for topic '{topic}' with result: {removedSubscription}", subscription.Id, topic, removedSubscription);
+        }
+    }
+
+    private bool RemoveSubscription(string topic, Subscription subscription)
+    {
+        return _subscribers.TryGetValue(topic, out var subscriptions) && subscriptions.Remove(subscription);
     }
 }

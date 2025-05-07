@@ -1,6 +1,7 @@
 ﻿using System.Net.Sockets;
 using LiteDB;
 using LiteMq.Entities;
+using LiteMq.Extensions;
 using LiteMq.Managers;
 
 namespace LiteMq;
@@ -12,6 +13,7 @@ internal class MessageQueue : IDisposable
     private readonly HashSet<string> _processedHashes = [];
     private readonly SubscriptionManager _subscriptionManager;
     private readonly PeerManager _peerManager;
+    private readonly Lock _lock = new();
 
     public MessageQueue(string dbPath, SubscriptionManager subscriptionManager, PeerManager peerManager)
     {
@@ -23,25 +25,61 @@ internal class MessageQueue : IDisposable
 
     public void Publish(string topic, string payload, bool forward = true)
     {
-        var hash = $"{topic}|{payload}".GetHashCode().ToString();
+        var normalizedTopic = topic.NormalizeString();
+
+        var hash = $"{normalizedTopic}|{payload}".GetHashCode().ToString();
         if (!_processedHashes.Add(hash)) return;
 
-        var message = new Message { Topic = topic, Payload = payload };
-        _collection.Insert(message);
-        _subscriptionManager.NotifyConnectedSubscribers(topic, payload);
+        var message = new Message { Topic = normalizedTopic, Payload = payload };
+        lock (_lock)
+        {
+            _collection.Insert(message);
+        }
+        _subscriptionManager.NotifyConnectedSubscribers(normalizedTopic, payload);
 
         if (forward)
-            _peerManager.ForwardToPeers(topic, payload);
+            _peerManager.ForwardToPeers("pub", normalizedTopic, payload);
     }
 
     public void Subscribe(string topic, TcpClient client, bool exclusive)
     {
-        _subscriptionManager.Subscribe(topic, client, exclusive);
+        var normalizedTopic = topic.NormalizeString();
+
+        _subscriptionManager.Subscribe(normalizedTopic, client, exclusive);
+
+        var nextAvailableMessage = GetNextAvailableMessage(normalizedTopic);
+
+        if (nextAvailableMessage != null)
+        {
+            _subscriptionManager.NotifyConnectedSubscribers(normalizedTopic, nextAvailableMessage.Payload);
+        }
+    }
+
+    public void Reset(string topic, bool forward = true)
+    {
+        var normalizedTopic = topic.NormalizeString();
+        
+        lock (_lock)
+        {
+            _collection.DeleteMany(x => x.Topic == normalizedTopic);
+        }
+        
+        if(forward)
+            _peerManager.ForwardToPeers("reset", normalizedTopic, null);
     }
 
     public void Dispose()
     {
         _db.Dispose();
         GC.SuppressFinalize(this);
+    }
+
+    private Message? GetNextAvailableMessage(string topic)
+    {
+        lock (_lock)
+        {
+            var message = _collection.Query().Where(x => x.Topic == topic).OrderBy(x => x.Timestamp).FirstOrDefault();
+            return message;
+        }
     }
 }
