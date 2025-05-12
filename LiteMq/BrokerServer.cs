@@ -48,7 +48,7 @@ public class BrokerServer
             {
                 case "pub":
                     if (parts.Length == 3)
-                        _queue.Publish(topic, parts[2], forward: false); // prevent loops
+                        _queue.Publish(topic, parts[2], forward: true);
                     break;
                 case "sub":
                     _queue.Subscribe(topic, client, false);

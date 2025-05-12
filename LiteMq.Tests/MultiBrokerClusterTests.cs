@@ -27,6 +27,7 @@ public class MultiBrokerClusterTests(ITestOutputHelper testOutputHelper)
         var writerSub = new StreamWriter(streamSub) { AutoFlush = true };
         var readerSub = new StreamReader(streamSub);
         await writerSub.WriteLineAsync("sub|global");
+        await Task.Delay(500); // Allow subscriber registration to complete
 
         // Connect publisher to broker 6000
         var clientPub = new TcpClient();
@@ -36,8 +37,16 @@ public class MultiBrokerClusterTests(ITestOutputHelper testOutputHelper)
         await writerPub.WriteLineAsync("pub|global|hello cluster");
 
         // Read response from subscriber
-        var received = await readerSub.ReadLineAsync();
-        Assert.Equal("hello cluster", received);
+        var readTask = readerSub.ReadLineAsync();
+        if (await Task.WhenAny(readTask, Task.Delay(3000)) == readTask)
+        {
+            var received = await readTask;
+            Assert.Equal("hello cluster", received);
+        }
+        else
+        {
+            throw new TimeoutException("Message not received within 3 seconds.");
+        }
 
         clientPub.Close();
         clientSub.Close();
