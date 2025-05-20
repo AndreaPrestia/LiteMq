@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Collections.Concurrent;
+using System.Net.Sockets;
 using LiteDB;
 using LiteMq.Entities;
 using LiteMq.Extensions;
@@ -14,13 +15,22 @@ internal class MessageQueue : IDisposable
     private readonly SubscriptionManager _subscriptionManager;
     private readonly PeerManager _peerManager;
     private readonly Lock _lock = new();
+    private readonly BlockingCollection<Message> _persistenceQueue = new();
+    private readonly bool _deleteStorageOnStop;
+    private readonly string _dbPath;
 
-    public MessageQueue(string dbPath, SubscriptionManager subscriptionManager, PeerManager peerManager)
+    public MessageQueue(string dbPath, SubscriptionManager subscriptionManager, PeerManager peerManager, bool deleteStorageOnStop)
     {
-        _db = new LiteDatabase(dbPath);
+        _dbPath = dbPath;
+        _db = new LiteDatabase(new ConnectionString
+        {
+            Filename = dbPath,
+            Connection = ConnectionType.Shared
+        });
         _collection = _db.GetCollection<Message>("messages");
         _peerManager = peerManager;
         _subscriptionManager = subscriptionManager;
+        _deleteStorageOnStop = deleteStorageOnStop;
     }
 
     public void Publish(string topic, string payload, bool forward = true)
@@ -71,6 +81,10 @@ internal class MessageQueue : IDisposable
     public void Dispose()
     {
         _db.Dispose();
+        if (_deleteStorageOnStop)
+        {
+            File.Delete(_dbPath);
+        }
         GC.SuppressFinalize(this);
     }
 

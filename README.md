@@ -85,6 +85,7 @@ var server = BrokerServerBuilder
     .WithPeers(peers)
     .WithMaxRetryForPeersCommunication(3)
     .WithMaxDelayForPeersCommunication(200)
+    .WithDeleteStorageOnStop(true)
     .Build();
 
 server.Start();
@@ -122,7 +123,7 @@ LiteMq/
 ├────────────────── Subscription.cs
 ├───────── Managers
 ├────────────────── SubscriptionManager.cs # Logic to manage subscriptions
-├────────────────── SubscriptionManager.cs # Logic to manage peers
+├────────────────── PeerManager.cs # Logic to manage peers
 ├───────── BrokerServer.cs  # Core logic (broker + queue)
 ├───────── MessageQueue.cs
 ├── LiteMq.Tests
@@ -167,4 +168,4 @@ chmod +x build.sh run.sh test.sh
 
 ## 📜 License
 
-This project is licensed under the MIT License. See `LICENSE` for details.
+This project is licensed under the MIT License.

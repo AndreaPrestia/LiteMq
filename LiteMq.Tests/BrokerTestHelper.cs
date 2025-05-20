@@ -44,6 +44,7 @@ public class BrokerTestHelper(ITestOutputHelper testOutputHelper)
                 .WithPeers(peers)
                 .WithMaxRetryForPeersCommunication(3)
                 .WithMaxDelayForPeersCommunication(100)
+                .WithDeleteStorageOnStop(true)
                 .Build();
             server.Start(); // This blocks, so we use a thread
         })

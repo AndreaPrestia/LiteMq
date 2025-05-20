@@ -28,6 +28,8 @@ public class BrokerTests(ITestOutputHelper testOutputHelper)
         var streamPub = clientPub.GetStream();
         var writerPub = new StreamWriter(streamPub) { AutoFlush = true };
 
+        await writerPub.WriteLineAsync("reset|test");
+
         await writerPub.WriteLineAsync("pub|test|hello world");
 
         var received = await readerSub.ReadLineAsync();
@@ -37,6 +39,55 @@ public class BrokerTests(ITestOutputHelper testOutputHelper)
         clientSub.Close();
 
         helper.StopAll();
+    }
+
+    [Theory]
+    [InlineData(10)]
+    public async Task PublishSubscribe_ShouldMaintain_Order_Test(int messages)
+    {
+        var helper = new BrokerTestHelper(testOutputHelper);
+        helper.StartCluster(
+            [
+                5000
+            ]
+        );
+
+        var sentMessages = Enumerable.Range(0, messages).Select(i => $"Hello world {i}").ToList();
+        var receivedMessages = new List<string>();
+
+        var clientSub = new TcpClient();
+        await clientSub.ConnectAsync("127.0.0.1", 5000);
+        var streamSub = clientSub.GetStream();
+        var writerSub = new StreamWriter(streamSub) { AutoFlush = true };
+        var readerSub = new StreamReader(streamSub);
+
+        await writerSub.WriteLineAsync("sub|test");
+
+        var clientPub = new TcpClient();
+        await clientPub.ConnectAsync("127.0.0.1", 5000);
+        var streamPub = clientPub.GetStream();
+        var writerPub = new StreamWriter(streamPub) { AutoFlush = true };
+
+        await writerPub.WriteLineAsync("reset|test");
+
+        foreach (var sentMessage in sentMessages)
+        {
+            await writerPub.WriteLineAsync($"pub|test|{sentMessage}");
+        }
+
+        while (receivedMessages.Count < sentMessages.Count)
+        {
+            var received = await readerSub.ReadLineAsync();
+            if (!string.IsNullOrEmpty(received))
+                receivedMessages.Add(received);
+        }
+
+        clientPub.Close();
+        clientSub.Close();
+
+        helper.StopAll();
+
+        Assert.Equal(sentMessages, receivedMessages);
     }
 
     [Fact]

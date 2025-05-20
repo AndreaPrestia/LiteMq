@@ -11,6 +11,7 @@ public class BrokerServerBuilder
     private List<IPEndPoint> _peers;
     private int _maxRetryForPeersCommunication;
     private int _maxDelayForPeersCommunicationInSeconds;
+    private bool _deleteStorageOnStop;
 
     private BrokerServerBuilder()
     {
@@ -51,7 +52,13 @@ public class BrokerServerBuilder
         _maxDelayForPeersCommunicationInSeconds  = maxDelayForPeersCommunicationInSeconds;
         return this;
     }
-
+    
+    public BrokerServerBuilder WithDeleteStorageOnStop(bool deleteStorageOnStop)
+    {
+        _deleteStorageOnStop  = deleteStorageOnStop;
+        return this;
+    }
+    
     public BrokerServer Build()
     {
         _ip ??= IPAddress.Loopback;
@@ -73,6 +80,6 @@ public class BrokerServerBuilder
 
         _dbPath = $"LiteMq_{_ip.ToString()}_{_port}.db";
         
-        return new BrokerServer(_ip, _port, _dbPath, new SubscriptionManager(), new PeerManager(_peers, _maxRetryForPeersCommunication, _maxDelayForPeersCommunicationInSeconds));
+        return new BrokerServer(_ip, _port, _dbPath, new SubscriptionManager(), new PeerManager(_peers, _maxRetryForPeersCommunication, _maxDelayForPeersCommunicationInSeconds), _deleteStorageOnStop);
     }
 }

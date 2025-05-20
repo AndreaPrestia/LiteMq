@@ -34,6 +34,7 @@ public class MultiBrokerClusterTests(ITestOutputHelper testOutputHelper)
         await clientPub.ConnectAsync("127.0.0.1", 6000);
         var streamPub = clientPub.GetStream();
         var writerPub = new StreamWriter(streamPub) { AutoFlush = true };
+        await writerPub.WriteLineAsync("reset|global");
         await writerPub.WriteLineAsync("pub|global|hello cluster");
 
         // Read response from subscriber
